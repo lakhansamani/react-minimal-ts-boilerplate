@@ -29,11 +29,14 @@ const isDevelopment = NODE_ENV === 'development';
 
 module.exports = {
 	mode: NODE_ENV || isDevelopment,
-	entry: ['./src/index.js'],
+	entry: ['./src/index'],
 	output: {
 		path: path.resolve(__dirname, 'dist'),
 		publicPath: '/',
 		filename: isDevelopment ? '[name].js' : '[name].[chunkhash:8].js',
+	},
+	resolve: {
+		extensions: ['.ts', '.tsx', '.js'],
 	},
 	optimization: {
 		splitChunks: {
@@ -44,7 +47,7 @@ module.exports = {
 	module: {
 		rules: [
 			{
-				test: /\.js$/,
+				test: /\.(ts|js)x?$/,
 				exclude: /node_modules/,
 				use: {
 					loader: 'babel-loader',
