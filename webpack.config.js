@@ -2,7 +2,7 @@ const path = require('path');
 const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const HtmlWebpackHarddiskPlugin = require('html-webpack-harddisk-plugin');
-const CleanWebpackPlugin = require('clean-webpack-plugin');
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const WriteWebPackPlugin = require('write-file-webpack-plugin');
 const Dotenv = require('dotenv-webpack');
@@ -20,7 +20,9 @@ const plugins = [
 		alwaysWriteToDisk: true,
 	}),
 	new HtmlWebpackHarddiskPlugin(),
-	new CopyWebpackPlugin(['./public/favicon.ico', './public/manifest.json']),
+	new CopyWebpackPlugin({
+		patterns: ['./public/favicon.ico', './public/manifest.json'],
+	}),
 	new WriteWebPackPlugin(),
 	new Dotenv(),
 ];
@@ -43,7 +45,14 @@ module.exports = {
 	},
 	optimization: {
 		splitChunks: {
-			chunks: 'initial',
+			cacheGroups: {
+				// Splitting React into a different bundle
+				common: {
+					test: /[\\/]node_modules[\\/](react|react-dom)[\\/]/,
+					name: 'common',
+					chunks: 'all',
+				},
+			},
 		},
 	},
 	plugins,
@@ -62,7 +71,23 @@ module.exports = {
 					{
 						loader: 'style-loader',
 						options: {
-							insertAt: 'top',
+							insert: function insertAtTop(element) {
+								const parent = document.querySelector('head');
+								// eslint-disable-next-line no-underscore-dangle
+								const lastInsertedElement =
+									window._lastElementInsertedByStyleLoader;
+
+								if (!lastInsertedElement) {
+									parent.insertBefore(element, parent.firstChild);
+								} else if (lastInsertedElement.nextSibling) {
+									parent.insertBefore(element, lastInsertedElement.nextSibling);
+								} else {
+									parent.appendChild(element);
+								}
+
+								// eslint-disable-next-line no-underscore-dangle
+								window._lastElementInsertedByStyleLoader = element;
+							},
 						},
 					},
 					'css-loader',
