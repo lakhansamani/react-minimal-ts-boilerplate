@@ -61,8 +61,6 @@ if (!isDevelopment) {
       minRatio: 0.8,
     }),
   );
-  // enable whenever required for bundle analysis
-  // plugins.push(new BundleAnalyzerPlugin());
 }
 
 module.exports = {
